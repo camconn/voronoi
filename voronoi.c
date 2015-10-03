@@ -20,6 +20,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
+#include <getopt.h>
+#include <string.h>
 
 #include "colors.c"
 
@@ -67,16 +69,66 @@ void printColor(FILE *f, struct RGB *color) {
 	fprintf(f, "%3d %3d %3d", color->red, color->green, color->blue);
 }
 
+void printHelp() {
+	printf("Usage: voronoi [OPTION]\n");
+	printf("Create voronoi Diagrams\n");
+	printf("\n");
+	printf("-p POINTS    Number of points to use\n");
+	printf("-c COLOR     Color theme to use\n");
+	printf("-l           Lists available color themes\n");
+	printf("-h           Prints this message\n");
+}
 
-int main(void) {
-	printf("Starting program\n");
 
-	time_t t;
-	srand((unsigned)time(&t));
+int main(int argc, char **argv) {
+	char *colorName = NULL;
+	extern char *optarg;
+	int numPoints = 500;
+	int c;
 
-	// get color number
-	char *colorName = "blues";
+	while ((c = getopt(argc, argv, "hlp:c:")) != 1) {
+		switch (c) {
+			case 'p':
+				//printf("points\n");
+				numPoints = atoi(optarg);
+				printf("Got points\n");
+				if (numPoints == 0) {
+					fprintf(stderr, "Invalid number of points: %s\n", optarg);
+					exit(-2);
+				}
+				break;
+			case 'c':
+				// printf("color\n");
+				colorName = malloc(sizeof(optarg));
+				strcpy(colorName, optarg);
+				break;
+			case 'h':
+				// printf("help");
+				printHelp();
+				return 0;
+			case 'l':
+				// printf("list");
+				printColors();
+				return 0;
+			default:
+				goto tail;
+		}
+	}
+tail:
+	srand((unsigned)time(NULL));
+
+	if (colorName == NULL) {
+		printf("No theme specified, using standard theme.\n");
+		colorName = "standard";
+	}
 	int colNum = colorNum(colorName);
+
+	if (colNum == -1) {
+		fprintf(stderr, "Invalid color name: %s\n", colorName);
+		exit(-1);
+	}
+
+
 	printf("Color number: %d\n", colNum);
 
 	// get size to malloc()
@@ -90,10 +142,9 @@ int main(void) {
 
 	printf("Using %s pallet\n", colorName);
 
-	int numPoints = 500;
 	struct point points[numPoints];
 
-	printf("Making random points\n");
+	printf("Making random points (%d)\n", numPoints);
 	// seed random with current time, otherwise we will get the SAME
 	// IMAGES EVERYTIME!!!!!!?!?!!!!!
 	for (int i = 0; i < numPoints; i++) {
@@ -102,10 +153,6 @@ int main(void) {
 	}
 
 	// points
-	printf("Points:\n");
-	for (int i = 0; i < numPoints; i++) {
-		printf("Point %2d: (%3d, %3d)\n", i+1, points[i].x, points[i].y);
-	}
 
 	FILE *file;
 	file = fopen("voronoi.ppm", "w");
@@ -117,6 +164,8 @@ int main(void) {
 
 	int p = 0;
 	struct RGB *color = malloc(sizeof(struct RGB));
+
+	printf("Creating image...");
 
 	for (int y = 0; y < HEIGHT; y++) {
 		for (int x = 0; x < WIDTH; x++) {

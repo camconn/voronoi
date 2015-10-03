@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 const long standard[11] = {
 	0x000000, // black
@@ -119,10 +120,21 @@ int colorNum(char* color) {
 		return BLUES;
 	} else if (strcmp(color, "warm") == 0) {
 		return WARM;
-	} else {
+	} else if (strcmp(color, "standard") == 0 ||
+			strcmp(color, "") == 0 ){
 		return DEFAULT;
+	} else {
+		return -1;
 	}
 
-	return 0;
+}
+
+void printColors() {
+	printf("Color theme list\n");
+	printf("Standard\n");
+	printf("Autumn\n");
+	printf("Blues\n");
+	printf("Rainbow\n");
+	printf("Warm\n");
 }
 
