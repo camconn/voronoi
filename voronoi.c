@@ -24,18 +24,19 @@
 #define WIDTH     500
 #define HEIGHT    500
 
-#define NUMCOLORS 10
-const long colors[10] = {
+#define NUMCOLORS 11
+const long colors[NUMCOLORS] = {
 	0x000000, // black
 	0xFFFFFF, // white
-	0xFF0000, // red
+	0x708090, // slate gray
 	0x0000FF, // blue
 	0x40E0D0, // turquoise
 	0xFFD700, // gold
 	0x800080, // purple
 	0x00FF00, // lime green
 	0xFA8072, // salmon
-	0x8B0000  // darker red
+	0x90EE90, // light green
+	0x87421F  // brown
 };
 
 struct point {
@@ -43,7 +44,7 @@ struct point {
 	int y;
 };
 
-struct point points[10];
+struct point points[NUMCOLORS];
 
 struct RGB {
 	int red;
@@ -99,7 +100,7 @@ int main(void) {
 	// points
 	printf("Points:\n");
 	for (int i = 0; i < NUMCOLORS; i++) {
-		printf("Point %2d: (%3d, %3d)\n", i, points[i].x, points[i].y);
+		printf("Point %2d: (%3d, %3d)\n", i+1, points[i].x, points[i].y);
 	}
 
 	FILE *file;
