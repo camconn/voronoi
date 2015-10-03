@@ -67,18 +67,28 @@ void printColor(FILE *f, struct RGB *color) {
 	fprintf(f, "%3d %3d %3d", color->red, color->green, color->blue);
 }
 
+
 int main(void) {
 	printf("Starting program\n");
 
 	time_t t;
 	srand((unsigned)time(&t));
-	int numColors = sizeof(rainbow) / sizeof(rainbow[0]);
-	int colors[numColors];
 
-	// copy values over
-	for (int i = 0; i < numColors; i++) {
-		colors[i] = rainbow[i];
-	}
+	// get color number
+	char *colorName = "blues";
+	int colNum = colorNum(colorName);
+	printf("Color number: %d\n", colNum);
+
+	// get size to malloc()
+	long *colors;
+	colors = malloc(colorSize(colNum));
+
+	writeColor(colNum, colors);
+
+	int numColors = palletColors(colNum);
+	writeColor(colNum, colors);
+
+	printf("Using %s pallet\n", colorName);
 
 	int numPoints = 500;
 	struct point points[numPoints];
