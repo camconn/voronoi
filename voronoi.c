@@ -115,6 +115,8 @@ int main(int argc, char **argv) {
 		}
 	}
 tail:
+	// We seed the rng becaues if we don't then we'll get the same image
+	// EVERY FREAKING TIME!!!!?!!!
 	srand((unsigned)time(NULL));
 
 	if (colorName == NULL) {
