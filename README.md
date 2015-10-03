@@ -2,7 +2,7 @@
 
 A Simple program to create [Voronoi diagrams](https://en.wikipedia.org/wiki/Voronoi_diagram).
 
-![Voronoi Diagram](https://raw.githubusercontent.com/camconn/voronoi/master/examples/voronoi.png)
+![Voronoi Diagram](examples/voronoi.png?raw=true "Voronoi Diagram")
 
 ### Usage
 
