@@ -21,30 +21,15 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "colors.c"
+
 #define WIDTH     500
 #define HEIGHT    500
-
-#define NUMCOLORS 11
-const long colors[NUMCOLORS] = {
-	0x000000, // black
-	0xFFFFFF, // white
-	0x708090, // slate gray
-	0x0000FF, // blue
-	0x40E0D0, // turquoise
-	0xFFD700, // gold
-	0x800080, // purple
-	0x00FF00, // lime green
-	0xFA8072, // salmon
-	0x90EE90, // light green
-	0x87421F  // brown
-};
 
 struct point {
 	int x;
 	int y;
 };
-
-struct point points[NUMCOLORS];
 
 struct RGB {
 	int red;
@@ -85,21 +70,30 @@ void printColor(FILE *f, struct RGB *color) {
 int main(void) {
 	printf("Starting program\n");
 
+	time_t t;
+	srand((unsigned)time(&t));
+	int numColors = sizeof(rainbow) / sizeof(rainbow[0]);
+	int colors[numColors];
+
+	// copy values over
+	for (int i = 0; i < numColors; i++) {
+		colors[i] = rainbow[i];
+	}
+
+	int numPoints = 500;
+	struct point points[numPoints];
+
 	printf("Making random points\n");
 	// seed random with current time, otherwise we will get the SAME
 	// IMAGES EVERYTIME!!!!!!?!?!!!!!
-	time_t t;
-	srand((unsigned)time(&t));
-
-	// make rand points
-	for (int i = 0; i < NUMCOLORS; i++) {
+	for (int i = 0; i < numPoints; i++) {
 		points[i].x = randXCoord();
 		points[i].y = randYCoord();
 	}
 
 	// points
 	printf("Points:\n");
-	for (int i = 0; i < NUMCOLORS; i++) {
+	for (int i = 0; i < numPoints; i++) {
 		printf("Point %2d: (%3d, %3d)\n", i+1, points[i].x, points[i].y);
 	}
 
@@ -122,7 +116,7 @@ int main(void) {
 
 			int closest;
 			double closestDist = WIDTH * HEIGHT;
-			for (p = 0; p < NUMCOLORS; p++) {
+			for (p = 0; p < numPoints; p++) {
 				//iterate through all pixels and find closest point
 				double dist = distance(x, y, points[p].x, points[p].y);
 
@@ -136,7 +130,7 @@ int main(void) {
 
 
 			//set to closest point's color value
-			hexToRGB(colors[closest], color);
+			hexToRGB(colors[closest % numColors], color);
 			printColor(file, color);
 		}
 		fprintf(file, "\n");
