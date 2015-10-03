@@ -19,6 +19,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define WIDTH     500
 #define HEIGHT    500
@@ -84,6 +85,11 @@ int main(void) {
 	printf("Starting program\n");
 
 	printf("Making random points\n");
+	// seed random with current time, otherwise we will get the SAME
+	// IMAGES EVERYTIME!!!!!!?!?!!!!!
+	time_t t;
+	srand((unsigned)time(&t));
+
 	// make rand points
 	for (int i = 0; i < NUMCOLORS; i++) {
 		points[i].x = randXCoord();
