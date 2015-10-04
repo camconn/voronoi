@@ -56,12 +56,21 @@ const long thief[5] = {
 	0x210F0B, // dark brown
 };
 
+const long toxic[5] = {
+	0xAEFF00, // florescent green
+	0xA6D444, // darker than above color
+	0xABA9A9, // light gray
+	0x808080, // darker gray
+	0x626654, // darkest gray
+};
+
 enum {
 	DEFAULT = 0,
 	AUTUMN,
 	BLUES,
 	RAINBOW,
 	THIEF,
+	TOXIC,
 	WARM
 };
 
@@ -89,6 +98,9 @@ void writeColor(int num, long colors[]) {
 		case THIEF:
 			copyArray(5, thief, colors);
 			break;
+		case TOXIC:
+			copyArray(5, toxic, colors);
+			break;
 		case WARM:
 			copyArray(5, warm, colors);
 			break;
@@ -103,6 +115,7 @@ int palletColors(int colorNum) {
 		case BLUES:
 		case RAINBOW:
 		case THIEF:
+		case TOXIC:
 		case WARM:
 			return 5;
 	}
@@ -118,6 +131,7 @@ int colorSize(int colorNum) {
 		case BLUES:
 		case RAINBOW:
 		case THIEF:
+		case TOXIC:
 		case WARM:
 			return sizeof(autumn);
 	}
@@ -136,6 +150,8 @@ int colorNum(char* color) {
 		return WARM;
 	} else if (strcmp(color, "thief") == 0) {
 		return THIEF;
+	} else if (strcmp(color, "toxic") == 0) {
+		return TOXIC;
 	} else if (strcmp(color, "standard") == 0 ||
 			strlen(color) == 0 ) {
 		return DEFAULT;
@@ -155,6 +171,8 @@ void printColors() {
 	printf("Autumn\n");
 	printf("Blues\n");
 	printf("Rainbow\n");
+	printf("Theif\n");
+	printf("Toxic\n");
 	printf("Warm\n");
 }
 
