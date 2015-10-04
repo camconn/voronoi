@@ -134,7 +134,7 @@ tail:
 	int colNum = colorNum(colorName);
 
 	if (colNum == -1) {
-		fprintf(stderr, "Invalid color name: %s\n", colorName);
+		fprintf(stderr, "Invalid theme name: %s\n", colorName);
 		exit(-1);
 	} else if (colNum == -2) {
 		printColors();
