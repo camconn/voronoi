@@ -196,7 +196,6 @@ tail:
 			int closest;
 			double closestDist = width * height;
 			for (p = 0; p < numPoints; p++) {
-				//iterate through all pixels and find closest point
 				double dist = distance(x, y, points[p].x, points[p].y);
 
 				if (dist < closestDist) {
@@ -204,9 +203,6 @@ tail:
 					closestDist = dist;
 				}
 			}
-
-			// printf("(%3d, %3d) # Closest point is (%3d, %3d)\n", x, y, points[closest].x, points[closest].y);
-
 
 			//set to closest point's color value
 			hexToRGB(colors[closest % numColors], color);
