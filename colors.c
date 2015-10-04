@@ -121,8 +121,10 @@ int colorNum(char* color) {
 	} else if (strcmp(color, "warm") == 0) {
 		return WARM;
 	} else if (strcmp(color, "standard") == 0 ||
-			strcmp(color, "") == 0 ){
+			strlen(color) == 0 ) {
 		return DEFAULT;
+	} else if (strcmp(color, "list") == 0) {
+		return -2;
 	} else {
 		return -1;
 	}
@@ -130,7 +132,9 @@ int colorNum(char* color) {
 }
 
 void printColors() {
+	printf("\n");
 	printf("Color theme list\n");
+	printf("==============\n");
 	printf("Standard\n");
 	printf("Autumn\n");
 	printf("Blues\n");

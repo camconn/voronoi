@@ -25,9 +25,6 @@
 
 #include "colors.c"
 
-#define WIDTH     500
-#define HEIGHT    500
-
 struct point {
 	int x;
 	int y;
@@ -50,12 +47,12 @@ double distance(int x, int y, int a, int b) {
 	return dist;
 }
 
-int randXCoord() {
-	return rand() % WIDTH;
+int randXCoord(int width) {
+	return rand() % width;
 }
 
-int randYCoord() {
-	return rand() % HEIGHT;
+int randYCoord(int height) {
+	return rand() % height;
 }
 
 // interpret hex and write values to RGB struct
@@ -74,8 +71,10 @@ void printHelp() {
 	printf("Create voronoi Diagrams\n");
 	printf("\n");
 	printf("-p POINTS    Number of points to use\n");
-	printf("-c COLOR     Color theme to use\n");
-	printf("-l           Lists available color themes\n");
+	printf("-c COLOR     Color theme to use. Using `-c LIST` will list the\n");
+	printf("             themes available\n");
+	printf("-w NUM       Make an image NUM pixels wide (default 500)\n");
+	printf("-t NUM       Make an image NUM pixels tall (default 500)\n");
 	printf("-h           Prints this message\n");
 }
 
@@ -86,7 +85,10 @@ int main(int argc, char **argv) {
 	int numPoints = 500;
 	int c;
 
-	while ((c = getopt(argc, argv, "hlp:c:")) != 1) {
+	int width =  500;
+	int height = 500;
+
+	while ((c = getopt(argc, argv, "hlp:c:w:t:")) != 1) {
 		switch (c) {
 			case 'p':
 				//printf("points\n");
@@ -98,7 +100,6 @@ int main(int argc, char **argv) {
 				}
 				break;
 			case 'c':
-				// printf("color\n");
 				colorName = malloc(sizeof(optarg));
 				strcpy(colorName, optarg);
 				break;
@@ -106,10 +107,16 @@ int main(int argc, char **argv) {
 				// printf("help");
 				printHelp();
 				return 0;
-			case 'l':
-				// printf("list");
-				printColors();
-				return 0;
+			case 'w':
+				width = atoi(optarg);
+				if (width <= 0)
+					fprintf(stderr, "Width must be greater than 0 pixels\n");
+				break;
+			case 't': 
+				height = atoi(optarg);
+				if (height <= 0) 
+					fprintf(stderr, "Height must be greater than 0 pixels\n");
+				break;
 			default:
 				goto tail;
 		}
@@ -123,11 +130,15 @@ tail:
 		printf("No theme specified, using standard theme.\n");
 		colorName = "standard";
 	}
+
 	int colNum = colorNum(colorName);
 
 	if (colNum == -1) {
 		fprintf(stderr, "Invalid color name: %s\n", colorName);
 		exit(-1);
+	} else if (colNum == -2) {
+		printColors();
+		return 0;
 	}
 
 
@@ -150,8 +161,8 @@ tail:
 	// seed random with current time, otherwise we will get the SAME
 	// IMAGES EVERYTIME!!!!!!?!?!!!!!
 	for (int i = 0; i < numPoints; i++) {
-		points[i].x = randXCoord();
-		points[i].y = randYCoord();
+		points[i].x = randXCoord(width);
+		points[i].y = randYCoord(height);
 	}
 
 	// points
@@ -161,22 +172,23 @@ tail:
 
 	// write header
 	fprintf(file, "P3\n");
-	fprintf(file, "%d %d\n", WIDTH, HEIGHT);
+	fprintf(file, "%d %d\n", width, height);
 	fprintf(file, "255\n");
 
 	int p = 0;
 	struct RGB *color = malloc(sizeof(struct RGB));
 
-	printf("Creating image...");
+	printf("Image dimensions: %d by %d\n", width, height);
+	printf("Creating image...\n");
 
-	for (int y = 0; y < HEIGHT; y++) {
-		for (int x = 0; x < WIDTH; x++) {
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
 			if (x != 0) {
 				fprintf(file, "   ");
 			}
 
 			int closest;
-			double closestDist = WIDTH * HEIGHT;
+			double closestDist = width * height;
 			for (p = 0; p < numPoints; p++) {
 				//iterate through all pixels and find closest point
 				double dist = distance(x, y, points[p].x, points[p].y);
