@@ -135,24 +135,21 @@ tail:
 	Theme t;
 	loadColors("colors.conf", &themes);
 
-	for (int i = 0; i < themes.numThemes; i++) {
-		printf("name: \"%s\"\n", themes.themes[i].name);
-	}
-	
 	int index = findTheme(&themes, &t, colorName);
 
 	if (index == -1) {
 		fprintf(stderr, "Could not find theme \"%s\"\n", colorName);
-		exit(-3);
+		return -3;
+	} else if (index == LIST) {
+		printThemes(&themes);
+		return 0;
 	}
 
 	t = themes.themes[index];
 
 	printf("Loaded theme %s\n", colorName);
 	
-
 	struct point points[numPoints];
-
 	printf("Making random points (%d)\n", numPoints);
 	// seed random with current time, otherwise we will get the SAME
 	// IMAGES EVERYTIME!!!!!!?!?!!!!!

@@ -82,7 +82,6 @@ int loadColors(char* path, Pallet* themes) {
 
 				char* name = (char*)malloc(MAXNAMELEN+1);
 				substr(buf, name, 1, i);
-				printf("Now have key name \"%s\"\n", name);
 
 				themes->themes[themes->numThemes].name = name;
 				themes->themes[themes->numThemes].nameLen = i-1;
@@ -94,7 +93,7 @@ int loadColors(char* path, Pallet* themes) {
 			int i = indexOf(buf, '\n');
 
 			if (i == -1) {
-				printf("How does this crap happen?\n");
+				fprintf(stderr, "How does this crap happen?\n");
 				continue;
 			}
 
@@ -107,8 +106,6 @@ int loadColors(char* path, Pallet* themes) {
 			hex[0] = '0';
 			hex[1] = 'x';
 			
-			printf("Hex \"%s\"\n", hex);
-
 			long value = strtol(hex, NULL, 0);
 
 			// printf("got hex value \"%x\"\n", (unsigned)value);
@@ -134,25 +131,26 @@ void copyArray(int n, const long src[], long dst[]) {
 	}
 }
 
-void printColors() {
-	// TODO: Make this dynamic!
-	printf("\n");
-	printf("Color theme list\n");
+void printThemes(Pallet *themes) {
+	printf("Color theme list (%d themes available)\n", themes->numThemes);
 	printf("==============\n");
-	printf("Standard\n");
-	printf("Autumn\n");
-	printf("Blues\n");
-	printf("Rainbow\n");
-	printf("Theif\n");
-	printf("Toxic\n");
-	printf("Warm\n");
+
+	for (int i = 0; i < themes->numThemes; i++) {
+		printf("%s\n", themes->themes[i].name);
+	}
 }
+
+// Number to return if we'd rather print out a list of themes
+#define LIST -10
 
 // find the index of a theme by using its name
 int findTheme(Pallet *themes, Theme *t, char* name) {
 	// convert string to lowercase
+	if (strcmp(name, "list") == 0) {
+		return LIST;
+	}
+
 	for (int i = 0; i < themes->numThemes; i++) {
-		printf("i: %d\n", i);
 		// printf("%d\n", t->nameLen);
 		if (strcmp(name, (themes->themes[i]).name) == 0) {
 			t = &themes->themes[i];
