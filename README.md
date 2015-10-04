@@ -15,6 +15,8 @@ And then a PPM file will be created called `voronoi.ppm`. This is your Voronoi d
 It is preferable to use an external tool to convert the `.ppm` file to another format that
 is more space-efficient, such as `.png`.
 
+For more detailed usage, run the command `./voronoi -h`.
+
 ### Creating themes
 
 Creating your own theme is really simple. Just make a theme name enclosed in `[brackets`] and
