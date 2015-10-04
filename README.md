@@ -12,6 +12,12 @@ make
 ```
 
 And then a PPM file will be created called `voronoi.ppm`. This is your Voronoi diagram.
+It is preferable to use an external tool to convert the `.ppm` file to another format that
+is more space-efficient, such as `.png`.
+
+### Examples
+
+A few samples of output are available in the `examples` subdirectory.
 
 ### License
 
