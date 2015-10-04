@@ -48,11 +48,20 @@ const long autumn[5] = {
 	0xBE2802, // dark orange
 };
 
+const long thief[5] = {
+	0x1A0804, // midnight
+	0x1A3019, // dark leaf green
+	0x096A47, // deep blue
+	0x103F27, // another weird green color
+	0x210F0B, // dark brown
+};
+
 enum {
 	DEFAULT = 0,
 	AUTUMN,
 	BLUES,
 	RAINBOW,
+	THIEF,
 	WARM
 };
 
@@ -77,6 +86,9 @@ void writeColor(int num, long colors[]) {
 		case RAINBOW:
 			copyArray(5, rainbow, colors);
 			break;
+		case THIEF:
+			copyArray(5, thief, colors);
+			break;
 		case WARM:
 			copyArray(5, warm, colors);
 			break;
@@ -90,6 +102,7 @@ int palletColors(int colorNum) {
 		case AUTUMN:
 		case BLUES:
 		case RAINBOW:
+		case THIEF:
 		case WARM:
 			return 5;
 	}
@@ -104,6 +117,7 @@ int colorSize(int colorNum) {
 		case AUTUMN:
 		case BLUES:
 		case RAINBOW:
+		case THIEF:
 		case WARM:
 			return sizeof(autumn);
 	}
@@ -120,6 +134,8 @@ int colorNum(char* color) {
 		return BLUES;
 	} else if (strcmp(color, "warm") == 0) {
 		return WARM;
+	} else if (strcmp(color, "thief") == 0) {
+		return THIEF;
 	} else if (strcmp(color, "standard") == 0 ||
 			strlen(color) == 0 ) {
 		return DEFAULT;
