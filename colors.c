@@ -50,13 +50,18 @@ void substr(char* src, char* dst, int start, int len) {
 	memcpy(dst, &src[start], len-1);
 }
 
+void clean(char arr[]) {
+	for (int i = 0; i < sizeof(arr); i++) {
+		arr[i] = 0;
+	}
+}
+
 int loadColors(char* path, Pallet* themes) {
 	FILE *configFile;
 
 	configFile = fopen(path, "r");
 
 	char buf[256];
-
 	while(fgets(buf, sizeof(buf), configFile)) {
 		// skip blank lines
 		if (strlen(buf) == 1) {
@@ -82,8 +87,8 @@ int loadColors(char* path, Pallet* themes) {
 				themes->themes[themes->numThemes].nameLength = i-1;
 
 				themes->numThemes++;
-
 			}
+
 		} else { //must be a hex value!
 			int i = indexOf(buf, '\n');
 
@@ -95,10 +100,23 @@ int loadColors(char* path, Pallet* themes) {
 			Theme *current = &(themes->themes[themes->numThemes-1]);
 
 			// append hex to index
-			substr(buf, current->name, 0, strlen(buf));
+			char* hex = (char*)malloc(9);
+			substr(buf, &hex[2], 0, strlen(buf));
+			// hack to append "0x" to beginning of hex for proper parsing
+			hex[0] = '0';
+			hex[1] = 'x';
+			
+			printf("Hex \"%s\"\n", hex);
 
-			printf("got hex value \"%s\"\n", current->name);
+			long value = strtol(hex, NULL, 0);
+
+			// printf("got hex value \"%x\"\n", (unsigned)value);
+
+			current->colors[current->numColors] = value;
+			current->numColors++;
 		}
+
+		memset(buf, 0, sizeof(buf));
 	}
 
 
