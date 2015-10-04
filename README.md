@@ -34,5 +34,5 @@ A few samples of output are available in the `examples` subdirectory.
 
 ### License
 
-This project is licensed under the Apache License, Version 2.0. A copy of this license may be
+This project is licensed under the GNU Public License, Verion 3 or Later. A copy of this license may be
 found in the file `LICENSE`.
