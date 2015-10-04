@@ -218,14 +218,20 @@ tail:
 		hexToRGB(t.colors[i], colorRGB[i]);
 	}
 
-
 	int p = 0;
 	int totalPixels = width * height;
 	int currentPixel = 0;
 
-	printf("break\n");
 	// allocating image in memory
-	struct RGB *pixels[totalPixels];
+	struct RGB *pixels[width];
+
+	// open file
+	FILE *file;
+	file = fopen("voronoi.ppm", "w");
+
+	fprintf(file, "P3\n");
+	fprintf(file, "%d %d\n", width, height);
+	fprintf(file, "255\n");
 
 	for (int y = 0; y < height; y++) {
 		updateCounter(currentPixel, totalPixels);
@@ -250,32 +256,23 @@ tail:
 			// just storing it in memory?
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-			pixels[y*width + x] = colorRGB[closest % t.numColors];
+			pixels[x] = colorRGB[closest % t.numColors];
 #pragma GCC diagnostic pop
+
 		}
+
+		// write pixels to disk one line at a time
+		for (int x = 0; x < width; x++) {
+			fprintf(file, "%3d %3d %3d   ", pixels[x]->red, pixels[x]->green, pixels[x]->blue);
+		}
+
+		fprintf(file, "\n");
 	}
 	// call this one more time just we we get that sweet 100% progress 
 	updateCounter(currentPixel, totalPixels);
 	printf("\n");
 
-	printf("Saving to disk...\n");
-	FILE *file;
-	file = fopen("voronoi.ppm", "w");
-
-	fprintf(file, "P3\n");
-	fprintf(file, "%d %d\n", width, height);
-	fprintf(file, "255\n");
-
-	for (int y = 0; y < height; y++) {
-		for (int x = 0; x < height; x++) {
-			fprintf(file, "%3d %3d %3d   ", pixels[y*width + x]->red,
-				pixels[y*width + x]->green,
-				pixels[y*width + x]->blue);
-		}
-		fprintf(file, "\n");
-	}
-
-	// save to disk
+	// sync to disk
 	fclose(file);
 
 	printf("Done!\n");
