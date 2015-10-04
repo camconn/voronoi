@@ -78,6 +78,11 @@ void printHelp() {
 	printf("-h           Prints this message\n");
 }
 
+void updateCounter(int current, int total) {
+	double progress = (1.0 * current / total) * 100;
+	printf("\rCurrent progress: %3.2f%%", progress);
+}
+
 
 int main(int argc, char **argv) {
 	char *colorName = NULL;
@@ -141,10 +146,8 @@ tail:
 		return 0;
 	}
 
-
 	printf("Color number: %d\n", colNum);
 
-	// get size to malloc()
 	long *colors;
 	colors = malloc(colorSize(colNum));
 
@@ -165,7 +168,8 @@ tail:
 		points[i].y = randYCoord(height);
 	}
 
-	// points
+	int totalPixels = width * height;
+	int currentPixel = 0;
 
 	FILE *file;
 	file = fopen("voronoi.ppm", "w");
@@ -182,7 +186,9 @@ tail:
 	printf("Creating image...\n");
 
 	for (int y = 0; y < height; y++) {
+		updateCounter(currentPixel, totalPixels);
 		for (int x = 0; x < width; x++) {
+			currentPixel++;
 			if (x != 0) {
 				fprintf(file, "   ");
 			}
@@ -208,6 +214,11 @@ tail:
 		}
 		fprintf(file, "\n");
 	}
+	
+	// call this one more time just we we get that sweet 100% progress 
+	updateCounter(currentPixel, totalPixels);
+
+	printf("\n");
 	free(color);
 
 	// save to disk
