@@ -99,7 +99,6 @@ void updateCounter(int current, int total) {
 	printf("\rCurrent progress: %3.2f%%", progress);
 }
 
-
 int main(int argc, char **argv) {
 	char *colorName = "standard";
 	extern char *optarg;
@@ -196,20 +195,6 @@ tail:
 		points[i].y = randYCoord(height);
 	}
 
-	int totalPixels = width * height;
-	int currentPixel = 0;
-
-	FILE *file;
-	file = fopen("voronoi.ppm", "w");
-
-	// write header
-	fprintf(file, "P3\n");
-	fprintf(file, "%d %d\n", width, height);
-	fprintf(file, "255\n");
-
-	int p = 0;
-	struct RGB *color = malloc(sizeof(struct RGB));
-
 	printf("Image dimensions: %d by %d\n", width, height);
 	printf("Creating image...\n");
 
@@ -226,15 +211,26 @@ tail:
 		return -3;
 	}
 
+	struct RGB *colorRGB[t.numColors];
 
+	for (int i = 0; i < t.numColors; i++) {
+		colorRGB[i] = (struct RGB*)malloc(sizeof(struct RGB));
+		hexToRGB(t.colors[i], colorRGB[i]);
+	}
+
+
+	int p = 0;
+	int totalPixels = width * height;
+	int currentPixel = 0;
+
+	printf("break\n");
+	// allocating image in memory
+	struct RGB *pixels[totalPixels];
 
 	for (int y = 0; y < height; y++) {
 		updateCounter(currentPixel, totalPixels);
 		for (int x = 0; x < width; x++) {
 			currentPixel++;
-			if (x != 0) {
-				fprintf(file, "   ");
-			}
 
 			int closest;
 			double closestDist = width * height; // We need an initial value, so set it to the maximum possible
@@ -250,20 +246,34 @@ tail:
 			// set to closest point's color value
 			// ignore warning about closest being uninitialized, because
 			// logically that cannot happen
+			// TODO: Instead of dynamically calculating this every time, how about
+			// just storing it in memory?
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-			hexToRGB(t.colors[closest % t.numColors], color);
+			pixels[y*width + x] = colorRGB[closest % t.numColors];
 #pragma GCC diagnostic pop
-			printColor(file, color);
+		}
+	}
+	// call this one more time just we we get that sweet 100% progress 
+	updateCounter(currentPixel, totalPixels);
+	printf("\n");
+
+	printf("Saving to disk...\n");
+	FILE *file;
+	file = fopen("voronoi.ppm", "w");
+
+	fprintf(file, "P3\n");
+	fprintf(file, "%d %d\n", width, height);
+	fprintf(file, "255\n");
+
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < height; x++) {
+			fprintf(file, "%3d %3d %3d   ", pixels[y*width + x]->red,
+				pixels[y*width + x]->green,
+				pixels[y*width + x]->blue);
 		}
 		fprintf(file, "\n");
 	}
-	
-	// call this one more time just we we get that sweet 100% progress 
-	updateCounter(currentPixel, totalPixels);
-
-	printf("\n");
-	free(color);
 
 	// save to disk
 	fclose(file);
