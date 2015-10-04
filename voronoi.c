@@ -21,11 +21,14 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
-#include <getopt.h>
+//#include <getopt.h> // getopt.h is buggy as hell
+#include <unistd.h>
 #include <string.h>
 
 #include "colors.c"
 
+#define EUCLIDEAN 0
+#define MANHATTAN 1
 struct point {
 	int x;
 	int y;
@@ -38,7 +41,8 @@ struct RGB {
 };
 
 // Calculate the distance between two points (x,y) and (a, b)
-double distance(int x, int y, int a, int b) {
+// uses the standard euclidean distance formula
+double euclideanDist(int x, int y, int a, int b) {
 	int horizDistance = abs(x - a);
 	int vertDistance = abs(y - b);
 
@@ -46,6 +50,14 @@ double distance(int x, int y, int a, int b) {
 			pow(vertDistance, 2));
 
 	return dist;
+}
+
+// Calculate the distance between two points (x,y) and (a,b)
+// using the Manhattan distance
+// We return a double type to keep compatibility with
+// euclideanDist
+double manhattanDist(int x, int y, int a, int b) {
+	return abs(x - a) + abs(y - b);
 }
 
 int randXCoord(int width) {
@@ -68,14 +80,17 @@ void printColor(FILE *f, struct RGB *color) {
 }
 
 void printHelp() {
-	printf("Usage: voronoi [OPTION]\n");
+	printf("Usage: voronoi [OPTIONS]\n");
 	printf("Create voronoi Diagrams\n");
 	printf("\n");
-	printf("-p POINTS    Number of points to use\n");
+	printf("Available options:\n");
 	printf("-c COLOR     Color theme to use. Using `-c LIST` will list the\n");
 	printf("             themes available\n");
-	printf("-w NUM       Make an image NUM pixels wide (default 500)\n");
+	printf("-d DISTTYPE  Type of distance to use. Available distance types:\n");
+	printf("             euclidean (default), manhattan\n");
+	printf("-p POINTS    Number of points to use\n");
 	printf("-t NUM       Make an image NUM pixels tall (default 500)\n");
+	printf("-w NUM       Make an image NUM pixels wide (default 500)\n");
 	printf("-h           Prints this message\n");
 }
 
@@ -90,16 +105,20 @@ int main(int argc, char **argv) {
 	extern char *optarg;
 	int numPoints = 500;
 	int c;
+	int distType = EUCLIDEAN;
 
 	int width =  500;
 	int height = 500;
 
-	while ((c = getopt(argc, argv, "hlp:c:w:t:")) != 1) {
+	// For some strange reason the first letter of the control string of
+	// getopt (argument three) is ignored...
+	// ergo, we use <unistd.h>
+	while ((c = getopt(argc, argv, "c:w:t:d:p:h")) != 1) {
 		switch (c) {
+			// stuff
 			case 'p':
-				//printf("points\n");
-				numPoints = atoi(optarg);
 				printf("Got points\n");
+				numPoints = atoi(optarg);
 				if (numPoints == 0) {
 					fprintf(stderr, "Invalid number of points: %s\n", optarg);
 					exit(-2);
@@ -123,6 +142,24 @@ int main(int argc, char **argv) {
 				if (height <= 0) 
 					fprintf(stderr, "Height must be greater than 0 pixels\n");
 				break;
+			case 'd':
+				if (strlen(optarg) == 0) {
+					fprintf(stderr, "Error: You must specify a distance type with the `-d` option.\n");
+					return -1;
+				}
+
+				if (strcmp(optarg, "euclidean") == 0) {
+					distType = EUCLIDEAN;
+				} else if (strcmp(optarg, "manhattan") == 0) {
+					distType = MANHATTAN;
+				} else {
+					fprintf(stderr, "Unknown distance type: %s\n", optarg);
+					printHelp();
+					return -1;
+				}
+			case '?':
+				//printf("wut?\n");
+				continue;
 			default:
 				goto tail;
 		}
@@ -176,6 +213,21 @@ tail:
 	printf("Image dimensions: %d by %d\n", width, height);
 	printf("Creating image...\n");
 
+	// We use a function pointer to reuse the distance calcuating code
+	double (*distanceFunc)(int,int,int,int);
+	if (distType == EUCLIDEAN) {
+		distanceFunc = &euclideanDist;
+		printf("Using Euclidean distance\n");
+	} else if (distType == MANHATTAN) {
+		distanceFunc = &manhattanDist;
+		printf("Using Manhattan distance\n");
+	} else {
+		printf("Unknown distance type... Exiting\n");
+		return -3;
+	}
+
+
+
 	for (int y = 0; y < height; y++) {
 		updateCounter(currentPixel, totalPixels);
 		for (int x = 0; x < width; x++) {
@@ -185,9 +237,9 @@ tail:
 			}
 
 			int closest;
-			double closestDist = width * height;
+			double closestDist = width * height; // We need an initial value, so set it to the maximum possible
 			for (p = 0; p < numPoints; p++) {
-				double dist = distance(x, y, points[p].x, points[p].y);
+				double dist = (*distanceFunc)(x, y, points[p].x, points[p].y);
 
 				if (dist < closestDist) {
 					closest = p;
