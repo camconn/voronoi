@@ -194,8 +194,13 @@ tail:
 				}
 			}
 
-			//set to closest point's color value
+			// set to closest point's color value
+			// ignore warning about closest being uninitialized, because
+			// logically that cannot happen
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 			hexToRGB(t.colors[closest % t.numColors], color);
+#pragma GCC diagnostic pop
 			printColor(file, color);
 		}
 		fprintf(file, "\n");
