@@ -131,6 +131,12 @@ tail:
 	// EVERY FREAKING TIME!!!!?!!!
 	srand((unsigned)time(NULL));
 
+	Pallet themes;
+	loadColors("colors.conf", &themes);
+
+	printf("Loaded %d themes.\n", themes.numThemes);
+
+#if 0
 	if (colorName == NULL) {
 		printf("No theme specified, using standard theme.\n");
 		colorName = "standard";
@@ -220,5 +226,7 @@ tail:
 	// save to disk
 	fclose(file);
 
+#endif
 	printf("Done!\n");
 }
+
