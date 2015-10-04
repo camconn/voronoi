@@ -17,6 +17,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #define MAXTHEMES  64 // maximum number of themes
 #define MAXCOLORS  20 // maximum colors per theme
@@ -26,7 +27,7 @@
 
 typedef struct Theme {
 	char* name;
-	int   nameLength;
+	int   nameLen;
 	int   numColors;
 	int   colors[MAXCOLORS];
 } Theme;
@@ -84,7 +85,7 @@ int loadColors(char* path, Pallet* themes) {
 				printf("Now have key name \"%s\"\n", name);
 
 				themes->themes[themes->numThemes].name = name;
-				themes->themes[themes->numThemes].nameLength = i-1;
+				themes->themes[themes->numThemes].nameLen = i-1;
 
 				themes->numThemes++;
 			}
@@ -132,6 +133,7 @@ void copyArray(int n, const long src[], long dst[]) {
 		dst[i] = src[i];
 	}
 }
+
 void printColors() {
 	// TODO: Make this dynamic!
 	printf("\n");
@@ -146,3 +148,16 @@ void printColors() {
 	printf("Warm\n");
 }
 
+// find the index of a theme by using its name
+int findTheme(Pallet *themes, Theme *t, char* name) {
+	// convert string to lowercase
+	for (int i = 0; i < themes->numThemes; i++) {
+		printf("i: %d\n", i);
+		// printf("%d\n", t->nameLen);
+		if (strcmp(name, (themes->themes[i]).name) == 0) {
+			t = &themes->themes[i];
+			return i;
+		}
+	}
+	return -1;
+}

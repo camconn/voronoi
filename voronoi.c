@@ -85,7 +85,7 @@ void updateCounter(int current, int total) {
 
 
 int main(int argc, char **argv) {
-	char *colorName = NULL;
+	char *colorName = "standard";
 	extern char *optarg;
 	int numPoints = 500;
 	int c;
@@ -132,37 +132,24 @@ tail:
 	srand((unsigned)time(NULL));
 
 	Pallet themes;
+	Theme t;
 	loadColors("colors.conf", &themes);
 
-	printf("Loaded %d themes.\n", themes.numThemes);
+	for (int i = 0; i < themes.numThemes; i++) {
+		printf("name: \"%s\"\n", themes.themes[i].name);
+	}
+	
+	int index = findTheme(&themes, &t, colorName);
 
-#if 0
-	if (colorName == NULL) {
-		printf("No theme specified, using standard theme.\n");
-		colorName = "standard";
+	if (index == -1) {
+		fprintf(stderr, "Could not find theme \"%s\"\n", colorName);
+		exit(-3);
 	}
 
-	int colNum = colorNum(colorName);
+	t = themes.themes[index];
 
-	if (colNum == -1) {
-		fprintf(stderr, "Invalid theme name: %s\n", colorName);
-		exit(-1);
-	} else if (colNum == -2) {
-		printColors();
-		return 0;
-	}
-
-	printf("Color number: %d\n", colNum);
-
-	long *colors;
-	colors = malloc(colorSize(colNum));
-
-	writeColor(colNum, colors);
-
-	int numColors = palletColors(colNum);
-	writeColor(colNum, colors);
-
-	printf("Using %s pallet\n", colorName);
+	printf("Loaded theme %s\n", colorName);
+	
 
 	struct point points[numPoints];
 
@@ -211,7 +198,7 @@ tail:
 			}
 
 			//set to closest point's color value
-			hexToRGB(colors[closest % numColors], color);
+			hexToRGB(t.colors[closest % t.numColors], color);
 			printColor(file, color);
 		}
 		fprintf(file, "\n");
@@ -226,7 +213,6 @@ tail:
 	// save to disk
 	fclose(file);
 
-#endif
 	printf("Done!\n");
 }
 
