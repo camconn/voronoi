@@ -21,7 +21,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
-//#include <getopt.h> // getopt.h is buggy as hell
 #include <unistd.h>
 #include <string.h>
 
@@ -29,15 +28,10 @@
 
 #define EUCLIDEAN 0
 #define MANHATTAN 1
+
 struct point {
 	int x;
 	int y;
-};
-
-struct RGB {
-	int red;
-	int green;
-	int blue;
 };
 
 // Calculate the distance between two points (x,y) and (a, b)
@@ -66,17 +60,6 @@ int randXCoord(int width) {
 
 int randYCoord(int height) {
 	return rand() % height;
-}
-
-// interpret hex and write values to RGB struct
-void hexToRGB(long hex, struct RGB *color) {
-	color->red =   ((hex >> 16) & 0xFF);
-	color->green = ((hex >> 8) & 0xFF);
-	color->blue =  ((hex) & 0xFF);
-}
-
-void printColor(FILE *f, struct RGB *color) {
-	fprintf(f, "%3d %3d %3d", color->red, color->green, color->blue);
 }
 
 void printHelp() {
@@ -249,11 +232,8 @@ tail:
 				}
 			}
 
-			// set to closest point's color value
 			// ignore warning about closest being uninitialized, because
 			// logically that cannot happen
-			// TODO: Instead of dynamically calculating this every time, how about
-			// just storing it in memory?
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 			pixels[x] = colorRGB[closest % t.numColors];

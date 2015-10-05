@@ -27,6 +27,23 @@
 
 #define CONFIG_ERROR 1
 
+struct RGB {
+	int red;
+	int green;
+	int blue;
+};
+
+// interpret hex and write values to RGB struct
+void hexToRGB(long hex, struct RGB *color) {
+	color->red =   ((hex >> 16) & 0xFF);
+	color->green = ((hex >> 8) & 0xFF);
+	color->blue =  ((hex) & 0xFF);
+}
+
+void printColor(FILE *f, struct RGB *color) {
+	fprintf(f, "%3d %3d %3d", color->red, color->green, color->blue);
+}
+
 typedef struct Theme {
 	char* name;
 	int   nameLen;
