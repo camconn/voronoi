@@ -64,7 +64,7 @@ int randYCoord(int height) {
 
 void printHelp() {
 	printf("Usage: voronoi [OPTIONS]\n");
-	printf("Create voronoi Diagrams\n");
+	printf("Create randomly generated voronoi Diagrams\n");
 	printf("\n");
 	printf("Available options:\n");
 	printf("-c COLOR     Color theme to use. Using `-c LIST` will list the\n");
