@@ -28,6 +28,7 @@
 
 #define EUCLIDEAN 0
 #define MANHATTAN 1
+#define CHEBYSHEV 2
 
 struct point {
 	int x;
@@ -54,6 +55,20 @@ double manhattanDist(int x, int y, int a, int b) {
 	return abs(x - a) + abs(y - b);
 }
 
+// Calculate the distance between two points (x, y) and (a, b)
+// using the Chebyshev distance.
+// Returns a double to keep compatibility with euclidean dist
+double chebyshevDist(int x, int y, int a, int b) {
+	int distHoriz = abs(x - a);
+	int distVert  = abs(y - b);
+
+	if (distHoriz > distVert) {
+		return distHoriz;
+	} else {
+		return distVert;
+	}
+}
+
 int randXCoord(int width) {
 	return rand() % width;
 }
@@ -70,7 +85,7 @@ void printHelp() {
 	printf("-c COLOR     Color theme to use. Using `-c LIST` will list the\n");
 	printf("             themes available\n");
 	printf("-d DISTTYPE  Type of distance to use. Available distance types:\n");
-	printf("             euclidean (default), manhattan\n");
+	printf("             euclidean (default), manhattan, chebyshev\n");
 	printf("-p POINTS    Number of points to use\n");
 	printf("-t NUM       Make an image NUM pixels tall (default 500)\n");
 	printf("-w NUM       Make an image NUM pixels wide (default 500)\n");
@@ -134,6 +149,8 @@ int main(int argc, char **argv) {
 					distType = EUCLIDEAN;
 				} else if (strcmp(optarg, "manhattan") == 0) {
 					distType = MANHATTAN;
+				} else if (strcmp(optarg, "chebyshev") == 0) {
+					distType = CHEBYSHEV;
 				} else {
 					fprintf(stderr, "Unknown distance type: %s\n", optarg);
 					printHelp();
@@ -189,6 +206,9 @@ tail:
 	} else if (distType == MANHATTAN) {
 		distanceFunc = &manhattanDist;
 		printf("Using Manhattan distance\n");
+	} else if (distType == CHEBYSHEV) {
+		distanceFunc = &chebyshevDist;
+		printf("Using Chebyshev distance\n");
 	} else {
 		printf("Unknown distance type... Exiting\n");
 		return -3;
