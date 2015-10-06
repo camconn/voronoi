@@ -151,8 +151,7 @@ void copyArray(int n, const long src[], long dst[]) {
 }
 
 void printThemes(Pallet *themes) {
-	printf("Color theme list (%d themes available)\n", themes->numThemes);
-	printf("==============\n");
+	printf("Available Themes (%d):\n", themes->numThemes);
 
 	for (int i = 0; i < themes->numThemes; i++) {
 		printf("%s\n", themes->themes[i].name);
