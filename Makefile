@@ -1,11 +1,20 @@
-default: voronoi
+CC = gcc
 
-voronoi.o: voronoi.c
-	gcc -c voronoi.c -o voronoi.o -std=gnu99 -lm -lpng -Wall -O3 -march=native
+# compiler flags:
+# -std=gnu99      use c99 standard with gnu extensions
+# -lm             use math.h library
+# -lpng           use libpng library
+# -Wall           enable all warnings
+# -O3             optimize for speed
+# -march=native   use processor-specific extensions (e.g. SSE2)
+CFLAGS = -std=gnu99 -lm -lpng -Wall -O3 -march=native
 
-voronoi: voronoi.o
-	gcc voronoi.o -o voronoi -lm -lpng -std=gnu99 -Wall -O3 -march=native
+TARGET = voronoi
+
+all: $(TARGET)
+
+$(TARGET): $(TARGET).c
+	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).c
 
 clean:
-	-rm -f voronoi.o
-	-rm -f voronoi
+	$(RM) $(TARGET)
