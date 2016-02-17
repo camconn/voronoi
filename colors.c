@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <stdint.h>
 
 #include "colors.h"
 
@@ -91,6 +92,9 @@ int loadColors(char* path, Pallet *themes) {
 				themes->themes[themes->numThemes].name = name;
 				themes->themes[themes->numThemes].nameLen = i-1;
 
+				for (int j = 0; j < MAXCOLORS; j++)
+					themes->themes[themes->numThemes].colors[j] = 0;
+
 				themes->numThemes++;
 			}
 
@@ -114,7 +118,7 @@ int loadColors(char* path, Pallet *themes) {
 			hex[4] = buf[4];
 			hex[5] = buf[5];
 			
-			int value = 1234;
+			unsigned int value = 0;
 			sscanf(hex, "%x", &value);
 
 			current->colors[current->numColors] = value;
@@ -140,17 +144,14 @@ void printThemes(Pallet *themes) {
 
 
 // find the index of a theme by using its name
-int findTheme(Pallet *themes, struct Theme *t, char* name) {
+int findTheme(Pallet *themes, char* name) {
 	// convert string to lowercase
 	if (strcmp(name, "list") == 0) {
 		return LIST;
 	}
 
 	for (int i = 0; i < themes->numThemes; i++) {
-		//printf("%d\n", t->nameLen);
-		//printf("theme: %s\n", themes->themes[i].name);
 		if (strcmp(name, (themes->themes[i]).name) == 0) {
-			t = &themes->themes[i];
 			return i;
 		}
 	}

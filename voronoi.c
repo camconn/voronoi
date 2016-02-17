@@ -79,6 +79,7 @@ void printHelp() {
 	printf("Create randomly generated voronoi Diagrams\n");
 	printf("\n");
 	printf("Available options:\n");
+	printf("-n PATH      Where to save the generated image (default: voronoi.png)\n");
 	printf("-c COLOR     Color theme to use. Using `-c LIST` will list the\n");
 	printf("             themes available\n");
 	printf("-d DISTTYPE  Type of distance to use. Available distance types:\n");
@@ -96,6 +97,7 @@ void updateCounter(int current, int total) {
 
 int main(int argc, char *argv[]) {
 	char *colorName = "standard";
+	char *filename = NULL;
 	extern char *optarg;
 	char c;
 	int distType = EUCLIDEAN;
@@ -105,10 +107,13 @@ int main(int argc, char *argv[]) {
 	int width = 500;
 	int height = 500;
 
+	// Workaround
+	int len;
+
 	// For some strange reason the first letter of the control string of
 	// getopt (argument three) is ignored...
 	// ergo, we use <unistd.h>
-	while ((c = getopt(argc, argv, "c:w:t:d:p:h")) != 1) {
+	while ((c = getopt(argc, argv, "c:n:w:t:d:p:h")) != 1) {
 		switch (c) {
 			// stuff
 			case 'p':
@@ -154,8 +159,19 @@ int main(int argc, char *argv[]) {
 					printHelp();
 					return -1;
 				}
+				break;
+			case 'n':
+				len = (strlen(optarg));
+				if (len == 0) {
+					printf("You need to specify a filename when using `-n`. Using default name instead.\n");
+					filename = "voronoi.png";
+				} else {
+					filename = optarg;
+				}
+				break;
 			case '?':
-				//printf("wut?\n");
+				//printf("how?\n");
+				// ignore unknown flags
 				continue;
 			default:
 				goto tail;
@@ -166,11 +182,15 @@ tail:
 	// EVERY FREAKING TIME!!!!?!!!
 	srand((unsigned)time(NULL));
 
+	// check if filename is the default one
+	if (filename == NULL)
+		filename = "voronoi.png";
+
 	Pallet themes;
 	struct Theme t;
 	loadColors("colors.conf", &themes);
 
-	int index = findTheme(&themes, &t, colorName);
+	int index = findTheme(&themes, colorName);
 
 	if (index == -1) {
 		fprintf(stderr, "Could not find theme \"%s\"\n", colorName);
@@ -220,13 +240,15 @@ tail:
 	int totalPixels = width * height;
 	int currentPixel = 0;
 
-	FILE *file = fopen("voronoi.png", "w");
+	FILE *file = fopen(filename, "w");
 
 	png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	png_infop info_ptr = png_create_info_struct(png_ptr);
 
+# if 0
 	if (setjmp(png_jmpbuf(png_ptr)))
 		exit(-1);
+#endif
 
 	png_init_io(png_ptr, file);
 
@@ -286,5 +308,5 @@ tail:
 	// sync to disk
 	fclose(file);
 
-	printf("Done! Output saved as \"voronoi.png\"\n");
+	printf("Done! Output saved as \"%s\"\n", filename);
 }
