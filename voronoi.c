@@ -227,6 +227,9 @@ tail:
 
 	// allocating image in memory
 	struct RGB *pixels[width];
+	for (int i = 0; i < width; i++) {
+		pixels[i] = 0;
+	}
 
 	// open file
 	FILE *file;
@@ -254,10 +257,7 @@ tail:
 
 			// ignore warning about closest being uninitialized, because
 			// logically that cannot happen
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 			pixels[x] = colorRGB[closest % t.numColors];
-#pragma GCC diagnostic pop
 
 		}
 
