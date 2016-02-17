@@ -10,16 +10,13 @@ A Simple program to create [Voronoi diagrams](https://en.wikipedia.org/wiki/Voro
 make
 ./voronoi
 ```
-
-And then a PPM file will be created called `voronoi.ppm`. This is your Voronoi diagram.
-It is preferable to use an external tool to convert the `.ppm` file to another format that
-is more space-efficient, such as `.png`.
+And then an image will be created called `voronoi.png`.
 
 For more detailed usage, run the command `./voronoi -h`.
 
 ### Creating themes
 
-Creating your own theme is really simple. Just make a theme name enclosed in `[brackets`] and
+Creating your own theme is really simple. Just make a theme name enclosed in `[brackets]` and
 list the theme's full-length (6 character) hex color codes behind it. For example, to make a
 red, white, and blue theme called *patriot*:
 

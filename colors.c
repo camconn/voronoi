@@ -1,6 +1,6 @@
 /*
  * voronoi - Generate random voronoi diagrams
- * Copyright (C) 2015 Cameron Conn
+ * Copyright (C) 2016 Cameron Conn
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,17 +21,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#define MAXTHEMES  64 // maximum number of themes
-#define MAXCOLORS  20 // maximum colors per theme
-#define MAXNAMELEN 64 // maximum length of theme name
-
-#define CONFIG_ERROR 1
-
-struct RGB {
-	int red;
-	int green;
-	int blue;
-};
+#include "colors.h"
 
 // interpret hex and write values to RGB struct
 void hexToRGB(long hex, struct RGB *color) {
@@ -44,16 +34,9 @@ void printColor(FILE *f, struct RGB *color) {
 	fprintf(f, "%3d %3d %3d", color->red, color->green, color->blue);
 }
 
-typedef struct Theme {
-	char* name;
-	int   nameLen;
-	int   numColors;
-	int   colors[MAXCOLORS];
-} Theme;
-
 typedef struct Pallet {
 	int   numThemes;
-	Theme themes[MAXTHEMES];
+	struct Theme themes[MAXTHEMES];
 } Pallet;
 
 int indexOf(char* term, char searchChar) {
@@ -70,16 +53,12 @@ void substr(char* src, char* dst, int start, int len) {
 	memcpy(dst, &src[start], len-1);
 }
 
-void clean(char arr[]) {
-	for (int i = 0; i < sizeof(arr); i++) {
-		arr[i] = 0;
-	}
-}
-
-int loadColors(char* path, Pallet* themes) {
+int loadColors(char* path, Pallet *themes) {
 	FILE *configFile;
 
 	configFile = fopen(path, "r");
+
+	struct Theme *current;
 
 	char buf[256];
 	while(fgets(buf, sizeof(buf), configFile)) {
@@ -87,17 +66,24 @@ int loadColors(char* path, Pallet* themes) {
 		if (strlen(buf) == 1) {
 			continue;
 		}	
+		
+		current = &(themes->themes[themes->numThemes-1]);
+
+		// printf("buf: %s\n", buf);
 
 		// TODO: Make this more robust
 		if (buf[0] == '[') { // theme name
 			int i = indexOf(buf, ']');
 
-			Theme t;
 
 			if (i == -1) {
 				goto fail;
 			} else {
-				themes->themes[themes->numThemes] = t;
+				struct Theme newTheme;
+				newTheme.nameLen = 0;
+				newTheme.numColors = 0;
+				newTheme.name = "";
+				themes->themes[themes->numThemes] = newTheme;
 
 				char* name = (char*)malloc(MAXNAMELEN+1);
 				substr(buf, name, 1, i);
@@ -116,18 +102,20 @@ int loadColors(char* path, Pallet* themes) {
 				continue;
 			}
 
-			Theme *current = &(themes->themes[themes->numThemes-1]);
 
 			// append hex to index
-			char* hex = (char*)malloc(9);
-			substr(buf, &hex[2], 0, strlen(buf));
-			// hack to append "0x" to beginning of hex for proper parsing
-			hex[0] = '0';
-			hex[1] = 'x';
+			// char hex[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+			char hex[] = {0, 0, 0, 0, 0, 0, '\0'};
+			// substr(buf, hex[2], 0, strlen(buf));
+			hex[0] = buf[0];
+			hex[1] = buf[1];
+			hex[2] = buf[2];
+			hex[3] = buf[3];
+			hex[4] = buf[4];
+			hex[5] = buf[5];
 			
-			long value = strtol(hex, NULL, 0);
-
-			// printf("got hex value \"%x\"\n", (unsigned)value);
+			int value = 1234;
+			sscanf(hex, "%x", &value);
 
 			current->colors[current->numColors] = value;
 			current->numColors++;
@@ -136,18 +124,10 @@ int loadColors(char* path, Pallet* themes) {
 		memset(buf, 0, sizeof(buf));
 	}
 
-
-
 	return 0;
 fail:
 	return CONFIG_ERROR;
 
-}
-
-void copyArray(int n, const long src[], long dst[]) {
-	for (int i = 0; i < n; i++) {
-		dst[i] = src[i];
-	}
 }
 
 void printThemes(Pallet *themes) {
@@ -158,18 +138,17 @@ void printThemes(Pallet *themes) {
 	}
 }
 
-// Number to return if we'd rather print out a list of themes
-#define LIST -10
 
 // find the index of a theme by using its name
-int findTheme(Pallet *themes, Theme *t, char* name) {
+int findTheme(Pallet *themes, struct Theme *t, char* name) {
 	// convert string to lowercase
 	if (strcmp(name, "list") == 0) {
 		return LIST;
 	}
 
 	for (int i = 0; i < themes->numThemes; i++) {
-		// printf("%d\n", t->nameLen);
+		//printf("%d\n", t->nameLen);
+		//printf("theme: %s\n", themes->themes[i].name);
 		if (strcmp(name, (themes->themes[i]).name) == 0) {
 			t = &themes->themes[i];
 			return i;

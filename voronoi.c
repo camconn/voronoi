@@ -1,6 +1,6 @@
 /*
- * voronoi - Generate random voronoi diagrams
- * Copyright (C) 2015 Cameron Conn
+ * voronoi - Generate random voronoi diagrams.
+ * Copyright (C) 2016 Cameron Conn
 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,17 +23,14 @@
 #include <time.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdint.h>
 
+#include <png.h>
+
+#include "voronoi.h"
+#include "colors.h"
 #include "colors.c"
 
-#define EUCLIDEAN 0
-#define MANHATTAN 1
-#define CHEBYSHEV 2
-
-struct point {
-	int x;
-	int y;
-};
 
 // Calculate the distance between two points (x,y) and (a, b)
 // uses the standard euclidean distance formula
@@ -97,11 +94,11 @@ void updateCounter(int current, int total) {
 	printf("\rCurrent progress: %3.2f%%", progress);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char *argv[]) {
 	char *colorName = "standard";
 	extern char *optarg;
 	int numPoints = 500;
-	int c;
+	char c;
 	int distType = EUCLIDEAN;
 
 	int width =  500;
@@ -112,9 +109,10 @@ int main(int argc, char **argv) {
 	// ergo, we use <unistd.h>
 	while ((c = getopt(argc, argv, "c:w:t:d:p:h")) != 1) {
 		switch (c) {
+		printf("ohai\n");
 			// stuff
 			case 'p':
-				printf("Got points\n");
+				// printf("Got points\n");
 				numPoints = atoi(optarg);
 				if (numPoints == 0) {
 					fprintf(stderr, "Invalid number of points: %s\n", optarg);
@@ -164,12 +162,12 @@ int main(int argc, char **argv) {
 		}
 	}
 tail:
-	// We seed the rng becaues if we don't then we'll get the same image
+	// We seed the rng because if we don't then we'll get the same image
 	// EVERY FREAKING TIME!!!!?!!!
 	srand((unsigned)time(NULL));
 
 	Pallet themes;
-	Theme t;
+	struct Theme t;
 	loadColors("colors.conf", &themes);
 
 	int index = findTheme(&themes, &t, colorName);
@@ -187,18 +185,15 @@ tail:
 	printf("Loaded theme %s\n", colorName);
 	
 	struct point points[numPoints];
-	printf("Making random points (%d)\n", numPoints);
-	// seed random with current time, otherwise we will get the SAME
-	// IMAGES EVERYTIME!!!!!!?!?!!!!!
+	printf("Generating random points (%d)\n", numPoints);
 	for (int i = 0; i < numPoints; i++) {
 		points[i].x = randXCoord(width);
 		points[i].y = randYCoord(height);
 	}
 
 	printf("Image dimensions: %d by %d\n", width, height);
-	printf("Creating image...\n");
 
-	// We use a function pointer to reuse the distance calcuating code
+	// We use a function pointer to reuse the distance calculating code
 	double (*distanceFunc)(int,int,int,int);
 	if (distType == EUCLIDEAN) {
 		distanceFunc = &euclideanDist;
@@ -225,56 +220,64 @@ tail:
 	int totalPixels = width * height;
 	int currentPixel = 0;
 
-	// allocating image in memory
-	struct RGB *pixels[width];
-	for (int i = 0; i < width; i++) {
-		pixels[i] = 0;
-	}
+	FILE *file = fopen("voronoi.png", "w");
 
-	// open file
-	FILE *file;
-	file = fopen("voronoi.ppm", "w");
+	png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	png_infop info_ptr = png_create_info_struct(png_ptr);
 
-	fprintf(file, "P3\n");
-	fprintf(file, "%d %d\n", width, height);
-	fprintf(file, "255\n");
+	if (setjmp(png_jmpbuf(png_ptr)))
+		exit(-1);
+
+	png_init_io(png_ptr, file);
+
+	png_set_IHDR(png_ptr, info_ptr, width, height,
+			8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
+			PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+
+	png_write_info(png_ptr, info_ptr);
+
+	int row_len = sizeof(uint8_t) * width * 3;
 
 	for (int y = 0; y < height; y++) {
+		png_byte *row = png_malloc(png_ptr, row_len);
 		updateCounter(currentPixel, totalPixels);
-		for (int x = 0; x < width; x++) {
-			currentPixel++;
 
-			int closest;
+		for (int x = 0; x < width; x++) {
+			int closest = 0;
 			double closestDist = width * height; // We need an initial value, so set it to the maximum possible
 			for (p = 0; p < numPoints; p++) {
 				double dist = (*distanceFunc)(x, y, points[p].x, points[p].y);
 
+				// TODO: Intrinsic?
+				// TODO: likely() or unlikely()?
 				if (dist < closestDist) {
 					closest = p;
 					closestDist = dist;
 				}
 			}
 
-			// ignore warning about closest being uninitialized, because
-			// logically that cannot happen
-			pixels[x] = colorRGB[closest % t.numColors];
-
+			struct RGB* color = colorRGB[closest % t.numColors];
+			*row++ = ((uint8_t)(color->red));
+			*row++ = ((uint8_t)(color->green));
+			*row++ = ((uint8_t)(color->blue));
 		}
 
-		// write pixels to disk one line at a time
-		for (int x = 0; x < width; x++) {
-			fprintf(file, "%3d %3d %3d   ", pixels[x]->red, pixels[x]->green, pixels[x]->blue);
-		}
+		currentPixel += width;
 
-		fprintf(file, "\n");
+		row -= row_len;
+		// put that pointer right back where it came from (so help me!)
+
+		png_write_row(png_ptr, row);
 	}
+
 	// call this one more time just we we get that sweet 100% progress 
 	updateCounter(currentPixel, totalPixels);
 	printf("\n");
 
+	png_write_end(png_ptr, info_ptr);
+
 	// sync to disk
 	fclose(file);
 
-	printf("Done!\n");
+	printf("Done! Output saved as \"voronoi.png\"\n");
 }
-
