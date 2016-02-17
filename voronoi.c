@@ -1,17 +1,17 @@
 /*
  * voronoi - Generate random voronoi diagrams.
- * Copyright (C) 2016 Cameron Conn
-
+ * Copyright (C) 2016 Cameron Conn         <cam {at} camconn {dot} cc>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -28,49 +28,47 @@
 #include <png.h>
 
 #include "voronoi.h"
-#include "colors.h"
 #include "colors.c"
 
 
-// Calculate the distance between two points (x,y) and (a, b)
-// uses the standard euclidean distance formula
-double euclideanDist(int x, int y, int a, int b) {
-	int horizDistance = abs(x - a);
-	int vertDistance = abs(y - b);
+/*
+ * Calculate the distance between two points using the standard Euclidean
+ * distance formula
+ */
+double euclideanDist(uint32_t x, uint32_t y, uint32_t a, uint32_t b) {
+	uint64_t horizDistance = llabs(((int64_t)x) - ((int64_t)a));
+	uint64_t vertDistance = llabs(((int64_t)y) - ((int64_t)b));
 
-	double dist = sqrt(pow(horizDistance, 2) + 
-			pow(vertDistance, 2));
-
-	return dist;
+	return sqrt(pow(horizDistance, 2) + pow(vertDistance, 2));
 }
 
-// Calculate the distance between two points (x,y) and (a,b)
-// using the Manhattan distance
-// We return a double type to keep compatibility with
-// euclideanDist
-double manhattanDist(int x, int y, int a, int b) {
-	return abs(x - a) + abs(y - b);
+/*
+ * Calculate the Manhattan distance between two points (x, y) and (a, b).
+ */
+double manhattanDist(uint32_t x, uint32_t y, uint32_t a, uint32_t b) {
+	return llabs(((int64_t)(x)) - ((int64_t)(a))) + 
+		llabs(((int64_t)(y)) - ((int64_t)(b)));
 }
 
-// Calculate the distance between two points (x, y) and (a, b)
-// using the Chebyshev distance.
-// Returns a double to keep compatibility with euclidean dist
-double chebyshevDist(int x, int y, int a, int b) {
-	int distHoriz = abs(x - a);
-	int distVert  = abs(y - b);
+/*
+ * Calculate the Chebyshev distance between two points (x, y) and (a, b).
+ */
+double chebyshevDist(uint32_t x, uint32_t y, uint32_t a, uint32_t b) {
+	uint64_t horizDistance = llabs(((int64_t)x) - ((int64_t)a));
+	uint64_t vertDistance = llabs(((int64_t)y) - ((int64_t)b));
 
-	if (distHoriz > distVert) {
-		return distHoriz;
+	if (horizDistance > vertDistance) {
+		return horizDistance;
 	} else {
-		return distVert;
+		return vertDistance;
 	}
 }
 
-int randXCoord(int width) {
+uint32_t randXCoord(uint32_t width) {
 	return rand() % width;
 }
 
-int randYCoord(int height) {
+uint32_t randYCoord(uint32_t height) {
 	return rand() % height;
 }
 
@@ -90,32 +88,29 @@ void printHelp() {
 	printf("-h           Prints this message\n");
 }
 
-void updateCounter(int current, int total) {
-	double progress = (1.0 * current / total) * 100;
+void updateCounter(uint64_t current, uint64_t total) {
+	float progress = (1.0 * current / total) * 100;
 	printf("\rCurrent progress: %3.2f%%", progress);
 }
 
 int main(int argc, char *argv[]) {
-	char *colorName = "standard";
-	char *filename = NULL;
-	extern char *optarg;
-	char c;
-	int distType = EUCLIDEAN;
-
 	// Default values
-	int numPoints = 500;
-	int width = 500;
-	int height = 500;
+	char *colorName = "standard";
+	uint32_t numPoints = 500;
+	uint32_t width = 500;
+	uint32_t height = 500;
+	uint32_t distType = EUCLIDEAN;
+	char *filename = NULL;
 
-	// Workaround
-	int len;
-
-	// For some strange reason the first letter of the control string of
-	// getopt (argument three) is ignored...
-	// ergo, we use <unistd.h>
+	// Required for getopt()
+	char c;
+	extern char *optarg;
+	/*
+	 * There is a bug related to getopt here. It is resolved by using
+	 * unistd.h instead of getopt.h (as is done with this program).
+	 */
 	while ((c = getopt(argc, argv, "c:n:w:t:d:p:h")) != 1) {
 		switch (c) {
-			// stuff
 			case 'p':
 				// printf("Got points\n");
 				numPoints = atoi(optarg);
@@ -129,9 +124,8 @@ int main(int argc, char *argv[]) {
 				strcpy(colorName, optarg);
 				break;
 			case 'h':
-				// printf("help");
 				printHelp();
-				return 0;
+				exit(0);
 			case 'w':
 				width = atoi(optarg);
 				if (width <= 0)
@@ -161,8 +155,7 @@ int main(int argc, char *argv[]) {
 				}
 				break;
 			case 'n':
-				len = (strlen(optarg));
-				if (len == 0) {
+				if (strlen(optarg)) {
 					printf("You need to specify a filename when using `-n`. Using default name instead.\n");
 					filename = "voronoi.png";
 				} else {
@@ -190,7 +183,7 @@ tail:
 	struct Theme t;
 	loadColors("colors.conf", &themes);
 
-	int index = findTheme(&themes, colorName);
+	int16_t index = findTheme(&themes, colorName);
 
 	if (index == -1) {
 		fprintf(stderr, "Could not find theme \"%s\"\n", colorName);
@@ -202,19 +195,22 @@ tail:
 
 	t = themes.themes[index];
 
-	printf("Loaded theme %s\n", colorName);
-	
+	printf("Using theme %s\n", colorName);
+
 	struct point points[numPoints];
 	printf("Generating random points (%d)\n", numPoints);
-	for (int i = 0; i < numPoints; i++) {
+	for (uint32_t i = 0; i < numPoints; i++) {
 		points[i].x = randXCoord(width);
 		points[i].y = randYCoord(height);
 	}
 
 	printf("Image dimensions: %d by %d\n", width, height);
 
-	// We use a function pointer to reuse the distance calculating code
-	double (*distanceFunc)(int,int,int,int);
+	/* 
+	 * For distanceFunc, a double return type is used because of the
+	 * large magnitudes of the inputs and outputs.
+	 */
+	double (*distanceFunc)(uint32_t,uint32_t,uint32_t,uint32_t);
 	if (distType == EUCLIDEAN) {
 		distanceFunc = &euclideanDist;
 		printf("Using Euclidean distance\n");
@@ -231,14 +227,13 @@ tail:
 
 	struct RGB *colorRGB[t.numColors];
 
-	for (int i = 0; i < t.numColors; i++) {
+	for (uint8_t i = 0; i < t.numColors; i++) {
 		colorRGB[i] = (struct RGB*)malloc(sizeof(struct RGB));
 		hexToRGB(t.colors[i], colorRGB[i]);
 	}
 
-	int p = 0;
-	int totalPixels = width * height;
-	int currentPixel = 0;
+	uint64_t totalPixels = width * height;
+	uint64_t currentPixel = 0;
 
 	FILE *file = fopen(filename, "w");
 
@@ -264,17 +259,22 @@ tail:
 	 * meaning that there is one byte (or uint8_t) for each
 	 * value of Red, Blue, and Green. This adds up to 24 bits (3 bytes)
 	 * per pixel.
+	 *
+	 * This is stated nowhere obvious in the libpng documentation. It
+	 * infuriated me to know end until I discovered the *real* format
+	 * myself.
 	 */
 	int row_len = sizeof(uint8_t) * 3 * width;
 
-	for (int y = 0; y < height; y++) {
+	for (uint32_t y = 0; y < height; y++) {
 		png_byte *row = png_malloc(png_ptr, row_len);
 		updateCounter(currentPixel, totalPixels);
 
-		for (int x = 0; x < width; x++) {
-			int closest = 0;
-			double closestDist = width * height; // We need an initial value, so set it to the maximum possible
-			for (p = 0; p < numPoints; p++) {
+		for (uint32_t x = 0; x < width; x++) {
+			uint32_t closest = 0;
+			double closestDist = width * height;
+			// closestDist needs *some* initial value, so set it to the largest one possible
+			for (uint32_t p = 0; p < numPoints; p++) {
 				double dist = (*distanceFunc)(x, y, points[p].x, points[p].y);
 
 				// TODO: Intrinsic?
@@ -305,7 +305,7 @@ tail:
 
 	png_write_end(png_ptr, info_ptr);
 
-	// sync to disk
+	// Make sure we are *really* saved to disk
 	fclose(file);
 
 	printf("Done! Output saved as \"%s\"\n", filename);

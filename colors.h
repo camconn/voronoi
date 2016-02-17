@@ -1,27 +1,28 @@
 /*
  * voronoi - Generate random voronoi diagrams.
- * Copyright (C) 2016 Cameron Conn
-
+ * Copyright (C) 2016 Cameron Conn         <cam {at} camconn {dot} cc>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _COLORS_
-#define _COLORS_
+#pragma once
 
-#define MAXTHEMES  64 // maximum number of themes
-#define MAXCOLORS  20 // maximum colors per theme
-#define MAXNAMELEN 64 // maximum length of theme name
+#include <stdint.h>
+
+#define MAXTHEMES  (uint8_t)64 // maximum number of themes
+#define MAXCOLORS  (uint8_t)20 // maximum colors per theme
+#define MAXNAMELEN (uint8_t)64 // maximum length of theme name
 
 #define CONFIG_ERROR 1
 
@@ -29,16 +30,14 @@
 #define LIST -10
 
 struct RGB {
-	int red;
-	int green;
-	int blue;
+	uint8_t red;
+	uint8_t green;
+	uint8_t blue;
 };
 
 struct Theme {
-	char* name;
-	int   nameLen;
-	int   numColors;
-	int   colors[MAXCOLORS];
+	uint16_t colors[MAXCOLORS];
+	uint16_t numColors;
+	uint8_t  nameLen;
+	char*    name;
 };
-
-#endif /* _COLORS_ */

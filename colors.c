@@ -1,17 +1,17 @@
 /*
- * voronoi - Generate random voronoi diagrams
- * Copyright (C) 2016 Cameron Conn
-
+ * voronoi - Generate random voronoi diagrams.
+ * Copyright (C) 2016 Cameron Conn         <cam {at} camconn {dot} cc>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -36,11 +36,11 @@ void printColor(FILE *f, struct RGB *color) {
 }
 
 typedef struct Pallet {
-	int   numThemes;
+	uint16_t     numThemes;
 	struct Theme themes[MAXTHEMES];
 } Pallet;
 
-int indexOf(char* term, char searchChar) {
+uint16_t indexOf(char* term, char searchChar) {
 	char* pos = strchr(term, searchChar);
 
 	if (pos == NULL)
@@ -50,7 +50,7 @@ int indexOf(char* term, char searchChar) {
 }
 
 // Extract the key between a bracket `[]` pair
-void substr(char* src, char* dst, int start, int len) {
+void substr(char* src, char* dst, uint8_t start, uint8_t len) {
 	memcpy(dst, &src[start], len-1);
 }
 
@@ -74,7 +74,7 @@ int loadColors(char* path, Pallet *themes) {
 
 		// TODO: Make this more robust
 		if (buf[0] == '[') { // theme name
-			int i = indexOf(buf, ']');
+			int8_t i = indexOf(buf, ']');
 
 
 			if (i == -1) {
@@ -92,14 +92,14 @@ int loadColors(char* path, Pallet *themes) {
 				themes->themes[themes->numThemes].name = name;
 				themes->themes[themes->numThemes].nameLen = i-1;
 
-				for (int j = 0; j < MAXCOLORS; j++)
+				for (uint8_t j = 0; j < MAXCOLORS; j++)
 					themes->themes[themes->numThemes].colors[j] = 0;
 
 				themes->numThemes++;
 			}
 
 		} else { //must be a hex value!
-			int i = indexOf(buf, '\n');
+			int8_t i = indexOf(buf, '\n');
 
 			if (i == -1) {
 				fprintf(stderr, "How does this crap happen?\n");
@@ -118,7 +118,7 @@ int loadColors(char* path, Pallet *themes) {
 			hex[4] = buf[4];
 			hex[5] = buf[5];
 			
-			unsigned int value = 0;
+			uint32_t value = 0;
 			sscanf(hex, "%x", &value);
 
 			current->colors[current->numColors] = value;
@@ -137,20 +137,20 @@ fail:
 void printThemes(Pallet *themes) {
 	printf("Available Themes (%d):\n", themes->numThemes);
 
-	for (int i = 0; i < themes->numThemes; i++) {
+	for (uint16_t i = 0; i < themes->numThemes; i++) {
 		printf("%s\n", themes->themes[i].name);
 	}
 }
 
 
 // find the index of a theme by using its name
-int findTheme(Pallet *themes, char* name) {
+int16_t findTheme(Pallet *themes, char* name) {
 	// convert string to lowercase
 	if (strcmp(name, "list") == 0) {
 		return LIST;
 	}
 
-	for (int i = 0; i < themes->numThemes; i++) {
+	for (uint16_t i = 0; i < themes->numThemes; i++) {
 		if (strcmp(name, (themes->themes[i]).name) == 0) {
 			return i;
 		}
