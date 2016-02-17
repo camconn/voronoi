@@ -97,11 +97,12 @@ void updateCounter(int current, int total) {
 int main(int argc, char *argv[]) {
 	char *colorName = "standard";
 	extern char *optarg;
-	int numPoints = 500;
 	char c;
 	int distType = EUCLIDEAN;
 
-	int width =  500;
+	// Default values
+	int numPoints = 500;
+	int width = 500;
 	int height = 500;
 
 	// For some strange reason the first letter of the control string of
@@ -109,7 +110,6 @@ int main(int argc, char *argv[]) {
 	// ergo, we use <unistd.h>
 	while ((c = getopt(argc, argv, "c:w:t:d:p:h")) != 1) {
 		switch (c) {
-		printf("ohai\n");
 			// stuff
 			case 'p':
 				// printf("Got points\n");
@@ -236,7 +236,14 @@ tail:
 
 	png_write_info(png_ptr, info_ptr);
 
-	int row_len = sizeof(uint8_t) * width * 3;
+	/*
+	 * row_len is how long each row is for the png bytes
+	 * `sizeof(uint8_t) * 3`  is the size of each RGB pixels's data,
+	 * meaning that there is one byte (or uint8_t) for each
+	 * value of Red, Blue, and Green. This adds up to 24 bits (3 bytes)
+	 * per pixel.
+	 */
+	int row_len = sizeof(uint8_t) * 3 * width;
 
 	for (int y = 0; y < height; y++) {
 		png_byte *row = png_malloc(png_ptr, row_len);
