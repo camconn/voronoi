@@ -36,7 +36,7 @@ struct RGB {
 };
 
 struct Theme {
-	uint16_t colors[MAXCOLORS];
+	uint32_t colors[MAXCOLORS];
 	uint16_t numColors;
 	uint8_t  nameLen;
 	char*    name;

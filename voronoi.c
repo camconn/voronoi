@@ -197,7 +197,7 @@ tail:
 
 	printf("Using theme %s\n", colorName);
 
-	struct point points[numPoints];
+	struct point *points = calloc(sizeof(struct point), numPoints);
 	printf("Generating random points (%d)\n", numPoints);
 	for (uint32_t i = 0; i < numPoints; i++) {
 		points[i].x = randXCoord(width);
@@ -225,11 +225,9 @@ tail:
 		return -3;
 	}
 
-	struct RGB *colorRGB[t.numColors];
-
+	struct RGB *colorRGB = calloc(sizeof(struct RGB), t.numColors);
 	for (uint8_t i = 0; i < t.numColors; i++) {
-		colorRGB[i] = (struct RGB*)malloc(sizeof(struct RGB));
-		hexToRGB(t.colors[i], colorRGB[i]);
+		hexToRGB(t.colors[i], &colorRGB[i]);
 	}
 
 	uint64_t totalPixels = width * height;
@@ -239,11 +237,6 @@ tail:
 
 	png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	png_infop info_ptr = png_create_info_struct(png_ptr);
-
-# if 0
-	if (setjmp(png_jmpbuf(png_ptr)))
-		exit(-1);
-#endif
 
 	png_init_io(png_ptr, file);
 
@@ -285,7 +278,7 @@ tail:
 				}
 			}
 
-			struct RGB* color = colorRGB[closest % t.numColors];
+			struct RGB* color = &colorRGB[closest % t.numColors];
 			*row++ = ((uint8_t)(color->red));
 			*row++ = ((uint8_t)(color->green));
 			*row++ = ((uint8_t)(color->blue));
@@ -305,7 +298,9 @@ tail:
 
 	png_write_end(png_ptr, info_ptr);
 
-	// Make sure we are *really* saved to disk
+	// Clean up before ending.
+	free(colorRGB);
+	free(points);
 	fclose(file);
 
 	printf("Done! Output saved as \"%s\"\n", filename);

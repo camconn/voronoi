@@ -25,7 +25,7 @@
 #include "colors.h"
 
 // interpret hex and write values to RGB struct
-void hexToRGB(long hex, struct RGB *color) {
+void hexToRGB(uint32_t hex, struct RGB *color) {
 	color->red =   ((hex >> 16) & 0xFF);
 	color->green = ((hex >> 8) & 0xFF);
 	color->blue =  ((hex) & 0xFF);
@@ -76,7 +76,6 @@ int loadColors(char* path, Pallet *themes) {
 		if (buf[0] == '[') { // theme name
 			int8_t i = indexOf(buf, ']');
 
-
 			if (i == -1) {
 				goto fail;
 			} else {
@@ -106,20 +105,11 @@ int loadColors(char* path, Pallet *themes) {
 				continue;
 			}
 
-
 			// append hex to index
-			// char hex[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-			char hex[] = {0, 0, 0, 0, 0, 0, '\0'};
-			// substr(buf, hex[2], 0, strlen(buf));
-			hex[0] = buf[0];
-			hex[1] = buf[1];
-			hex[2] = buf[2];
-			hex[3] = buf[3];
-			hex[4] = buf[4];
-			hex[5] = buf[5];
-			
-			uint32_t value = 0;
-			sscanf(hex, "%x", &value);
+			char *hex;
+			hex = buf;
+
+			uint32_t value = (uint32_t)strtol(hex, NULL, 16);
 
 			current->colors[current->numColors] = value;
 			current->numColors++;
