@@ -1,6 +1,6 @@
 /*
  * voronoi - Generate random voronoi diagrams.
- * Copyright (C) 2016 Cameron Conn         <cam {at} camconn {dot} cc>
+ * Copyright (C) 2015-2016 Cameron Conn    <cam {at} camconn {dot} cc>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
