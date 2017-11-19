@@ -35,7 +35,7 @@ void printColor(FILE *f, struct RGB *color) {
 	fprintf(f, "%3d %3d %3d", color->red, color->green, color->blue);
 }
 
-uint16_t indexOf(char* term, char searchChar) {
+int indexOf(char* term, char searchChar) {
 	char* pos = strchr(term, searchChar);
 
 	if (pos == NULL)
@@ -53,64 +53,59 @@ int loadColors(char* path, Pallet *themes) {
 	FILE *configFile;
 
 	configFile = fopen(path, "r");
+	if (configFile == NULL) {
+		fprintf(stderr, "Could not find colors.conf.\n");
+		exit(-4);
+	}
 
 	struct Theme *current;
+	themes->numThemes = 0;
 
-	char buf[2048];
-	while(fgets(buf, sizeof(buf), configFile)) {
-		// skip blank lines
-		if (strlen(buf) == 1) {
-			continue;
-		}
+	char* line = NULL;
+	size_t len = 128;
+	ssize_t read;
 
-		current = &(themes->themes[themes->numThemes]);
-
-		// printf("buf: %s\n", buf);
-
+	while ((read = getline(&line, &len, configFile)) > 0) {
+		// skip blank and lines that are too short
 		// TODO: Make this more robust
-		if (buf[0] == '[') { // theme name
-			int8_t i = indexOf(buf, ']');
+		if (line[0] == '[') { // theme name
+			// Clear things out
+			current = &(themes->themes[themes->numThemes]);
+			memset(current, 0, sizeof(struct Theme));
+			memset(current->colors, 0, sizeof(uint32_t[MAXCOLORS]));
+
+			int i = indexOf(line, ']');
 
 			if (i == -1) {
 				goto fail;
 			} else {
-				struct Theme newTheme;
-				newTheme.nameLen = 0;
-				newTheme.numColors = 0;
-				newTheme.name = "";
-				themes->themes[themes->numThemes] = newTheme;
-
 				char* name = (char*)malloc(MAXNAMELEN+1);
-				substr(buf, name, 1, i);
+				substr(line, name, 1, i);
 
-				themes->themes[themes->numThemes].name = name;
-				themes->themes[themes->numThemes].nameLen = i-1;
+				current->name = name;
 
 				for (uint8_t j = 0; j < MAXCOLORS; j++)
-					themes->themes[themes->numThemes].colors[j] = 0;
-
-				themes->numThemes++;
+					current->colors[j] = 0;
 			}
-
-		} else { //must be a hex value!
-			int8_t i = indexOf(buf, '\n');
-
-			if (i == -1) {
+		} else if (strlen(line) > 1) { //must be a hex value!
+			if (indexOf(line, '\n') == -1) {
 				fprintf(stderr, "How does this crap happen?\n");
+				//continue;
+			} else if (indexOf(line, '#') == 0) {
 				continue;
 			}
 
-			// append hex to index
-			char *hex;
-			hex = buf;
+			char hex[8];
+			strcpy(hex, line);
+			hex[6] = 0;
 
 			uint32_t value = (uint32_t)strtol(hex, NULL, 16);
 
 			current->colors[current->numColors] = value;
 			current->numColors++;
+		} else {
+			themes->numThemes++;
 		}
-
-		memset(buf, 0, sizeof(buf));
 	}
 
 	fclose(configFile);
@@ -133,7 +128,7 @@ void printThemes(Pallet *themes) {
 // find the index of a theme by using its name
 int16_t findTheme(Pallet *themes, char* name) {
 	// convert string to lowercase
-	if (strcmp(name, "list") == 0) {
+	if (strcasecmp(name, "list") == 0) {
 		return LIST;
 	}
 

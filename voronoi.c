@@ -128,18 +128,18 @@ int main(int argc, char *argv[]) {
 				exit(0);
 			case 'w':
 				width = atoi(optarg);
-				if (width <= 0)
+				if (width == 0)
 					fprintf(stderr, "Width must be greater than 0 pixels\n");
 				break;
 			case 't': 
 				height = atoi(optarg);
-				if (height <= 0) 
+				if (height == 0)
 					fprintf(stderr, "Height must be greater than 0 pixels\n");
 				break;
 			case 'd':
 				if (strlen(optarg) == 0) {
 					fprintf(stderr, "Error: You must specify a distance type with the `-d` option.\n");
-					return -1;
+					exit(-1);
 				}
 
 				if (strcmp(optarg, "euclidean") == 0) {
@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
 				} else {
 					fprintf(stderr, "Unknown distance type: %s\n", optarg);
 					printHelp();
-					return -1;
+					exit(-1);
 				}
 				break;
 			case 'n':
@@ -180,20 +180,25 @@ tail:
 		filename = "voronoi.png";
 
 	Pallet themes;
-	themes.numThemes = 0;
-	struct Theme t;
-	loadColors("colors.conf", &themes);
+	memset(&(themes.themes), 0, sizeof(themes.themes));
+
+	int ret = loadColors("colors.conf", &themes);
+	if (ret == CONFIG_ERROR) {
+		fprintf(stderr, "Could not load colors.conf!\n");
+		exit(CONFIG_ERROR);
+	}
 
 	int16_t index = findTheme(&themes, colorName);
 
 	if (index == -1) {
 		fprintf(stderr, "Could not find theme \"%s\"\n", colorName);
-		return -3;
+		exit(-3);
 	} else if (index == LIST) {
 		printThemes(&themes);
 		return 0;
 	}
 
+	struct Theme t;
 	t = themes.themes[index];
 
 	printf("Using theme %s\n", colorName);
@@ -223,7 +228,7 @@ tail:
 		printf("Using Chebyshev distance\n");
 	} else {
 		printf("Unknown distance type... Exiting\n");
-		return -3;
+		exit(-3);
 	}
 
 	struct RGB *colorRGB = calloc(sizeof(struct RGB), t.numColors);

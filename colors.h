@@ -39,7 +39,6 @@ struct RGB {
 struct Theme {
 	uint32_t colors[MAXCOLORS];
 	uint16_t numColors;
-	uint8_t  nameLen;
 	char*    name;
 };
 
@@ -48,7 +47,7 @@ typedef struct Pallet {
 	struct Theme themes[MAXTHEMES];
 } Pallet;
 
-uint16_t indexOf(char*, char);
+int indexOf(char*, char);
 void substr(char*, char*, uint8_t, uint8_t);
 
 int loadColors(char* path, Pallet *themes);
