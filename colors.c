@@ -56,14 +56,14 @@ int loadColors(char* path, Pallet *themes) {
 
 	struct Theme *current;
 
-	char buf[256];
+	char buf[2048];
 	while(fgets(buf, sizeof(buf), configFile)) {
 		// skip blank lines
 		if (strlen(buf) == 1) {
 			continue;
 		}
-		
-		current = &(themes->themes[themes->numThemes-1]);
+
+		current = &(themes->themes[themes->numThemes]);
 
 		// printf("buf: %s\n", buf);
 
@@ -113,8 +113,10 @@ int loadColors(char* path, Pallet *themes) {
 		memset(buf, 0, sizeof(buf));
 	}
 
+	fclose(configFile);
 	return 0;
 fail:
+	fclose(configFile);
 	return CONFIG_ERROR;
 
 }

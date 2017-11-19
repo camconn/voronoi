@@ -28,7 +28,7 @@
 #include <png.h>
 
 #include "voronoi.h"
-#include "colors.c"
+#include "colors.h"
 
 
 /*
@@ -180,6 +180,7 @@ tail:
 		filename = "voronoi.png";
 
 	Pallet themes;
+	themes.numThemes = 0;
 	struct Theme t;
 	loadColors("colors.conf", &themes);
 

@@ -1,11 +1,21 @@
 # Simple freaking makefile
 
-HEADERS = voronoi.h colors.h
+CC=gcc
+CFLAGS=-Wall -Wpedantic -std=gnu11
+LDFLAGS=-lm -lpng
+OBJECTS = voronoi.o colors.o
+DEFAULT=voronoi
 
-default: voronoi
+all: voronoi
 
-voronoi: voronoi.c $(HEADERS)
-	gcc -g -lm -lpng voronoi.c -o voronoi -std=c99
+debug: clean
+debug: CFLAGS += -DDEBUG -g
+debug: voronoi
+
+voronoi: $(OBJECTS)
+voronoi.o: voronoi.c voronoi.h
+colors.o: colors.c colors.h
 
 clean:
 	rm -f voronoi
+	rm -f *.o
