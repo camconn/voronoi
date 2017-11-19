@@ -35,11 +35,6 @@ void printColor(FILE *f, struct RGB *color) {
 	fprintf(f, "%3d %3d %3d", color->red, color->green, color->blue);
 }
 
-typedef struct Pallet {
-	uint16_t     numThemes;
-	struct Theme themes[MAXTHEMES];
-} Pallet;
-
 uint16_t indexOf(char* term, char searchChar) {
 	char* pos = strchr(term, searchChar);
 
@@ -66,7 +61,7 @@ int loadColors(char* path, Pallet *themes) {
 		// skip blank lines
 		if (strlen(buf) == 1) {
 			continue;
-		}	
+		}
 		
 		current = &(themes->themes[themes->numThemes-1]);
 

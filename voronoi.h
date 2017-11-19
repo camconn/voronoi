@@ -28,3 +28,13 @@ struct point {
 	uint32_t x;
 	uint32_t y;
 };
+
+double euclideanDist(uint32_t, uint32_t, uint32_t, uint32_t);
+double manhattanDist(uint32_t, uint32_t, uint32_t, uint32_t);
+double chebyshevDist(uint32_t, uint32_t, uint32_t, uint32_t);
+
+uint32_t randXCoord(uint32_t);
+uint32_t randYCoord(uint32_t);
+
+void printHelp();
+void updateCounter(uint64_t, uint64_t);

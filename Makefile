@@ -1,21 +1,11 @@
-CC = gcc
+# Simple freaking makefile
 
-# DEBUGFLAGS is the same as CFLAGS except it doesn't have "-O3"
-CFLAGS = -std=gnu99 -lm -lpng -Wall -g -O3 -march=native -flto -Wextra -pedantic
-DEBUGFLAGS = -std=gnu99 -lm -lpng -Wall -g -march=native -flto -Wextra -pedantic
+HEADERS = voronoi.h colors.h
 
-TARGET = voronoi
+default: voronoi
 
-all: $(TARGET)
-
-debug: $(TARGET)-debug
-
-$(TARGET)-debug: $(TARGET).c
-	# THIS IS A DEBUG BUILD!
-	$(CC) $(DEBUGFLAGS) -o $(TARGET) $(TARGET).c
-
-$(TARGET): $(TARGET).c
-	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).c
+voronoi: voronoi.c $(HEADERS)
+	gcc -g -lm -lpng voronoi.c -o voronoi -std=c99
 
 clean:
-	$(RM) $(TARGET)
+	rm -f voronoi

@@ -19,6 +19,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdio.h>
 
 #define MAXTHEMES  (uint8_t)64 // maximum number of themes
 #define MAXCOLORS  (uint8_t)20 // maximum colors per theme
@@ -41,3 +42,19 @@ struct Theme {
 	uint8_t  nameLen;
 	char*    name;
 };
+
+typedef struct Pallet {
+	uint16_t     numThemes;
+	struct Theme themes[MAXTHEMES];
+} Pallet;
+
+uint16_t indexOf(char*, char);
+void substr(char*, char*, uint8_t, uint8_t);
+
+int loadColors(char* path, Pallet *themes);
+
+void hexToRGB(uint32_t, struct RGB*);
+void printColor(FILE*, struct RGB*);
+
+void printThemes(Pallet*);
+int16_t findTheme(Pallet*, char*);
